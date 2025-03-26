@@ -29,7 +29,6 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-center">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4 ">
           <Input
-            className="w-[50%]"
             type="email"
             placeholder="Email"
             value={email}
