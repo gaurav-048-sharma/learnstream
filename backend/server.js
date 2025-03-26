@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes.js");
 const userRoutes = require('./routes/userRoutes.js');
 const courseRoutes = require('./routes/cources.js');
 const progressRoutes = require('./routes/progressRoutes.js');
+const certificateRoutes = require('./routes/certificateRoutes.js');
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes); 
 app.use('/api/progress', progressRoutes);
+app.use("/api/certificates", certificateRoutes);
 
 app.get('/', (req, res) => {
   res.send('LearnStream Backend is running!');

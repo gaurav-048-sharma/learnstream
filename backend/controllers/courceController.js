@@ -53,9 +53,17 @@ const createCourse = async (req, res) => {
   };
 
 // Read All Courses (already defined)
+// const getAllCourses = async (req, res) => {
+//   try {
+//     const courses = await Course.find().populate('instructor', 'name email');
+//     res.json(courses);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
 const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find().populate('instructor', 'name email');
+    const courses = await Course.find().populate('instructor', 'name email _id');
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

@@ -41,9 +41,10 @@ const registerUser = async (req, res) => {
 
 // Login user
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  
 
   try {
+    const { email, password } = req.body;
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
@@ -57,7 +58,7 @@ const loginUser = async (req, res) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
 
@@ -66,6 +67,8 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
 
 
 const logoutUser = async (req, res) => {

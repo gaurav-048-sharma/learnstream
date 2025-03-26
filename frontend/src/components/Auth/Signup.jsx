@@ -10,16 +10,33 @@ const Signup = () => {
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      await axios.post('http://localhost:8080/api/users', { name, email, password, role: 'student' })
-      navigate('/login')
-    } catch (error) {
-      console.error(error.response.data)
-      alert('Signup failed')
-    }
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
+  //   try {
+  //     await axios.post('http://localhost:8080/api/users', { name, email, password, role: 'student' })
+  //     navigate('/login')
+  //   } catch (error) {
+  //     console.error(error.response.data)
+  //     alert('Signup failed')
+  //   }
+  // }
+  // src/components/Auth/Signup.jsx
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  try {
+    await axios.post('http://localhost:8080/api/users', { 
+      name, 
+      email, 
+      password, 
+      role: 'instructor'  // Change this from 'student' to 'instructor'
+    })
+    navigate('/login')
+  } catch (error) {
+    console.error(error.response.data)
+    alert('Signup failed')
   }
+}
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen">
