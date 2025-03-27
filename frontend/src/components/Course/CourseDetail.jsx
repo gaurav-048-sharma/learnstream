@@ -28,9 +28,9 @@ const CourseDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const courseRes = await axios.get(`http://localhost:8080/api/courses/${id}`)
+        const courseRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses/${id}`)
         setCourse(courseRes.data)
-        const progressRes = await axios.get(`http://localhost:8080/api/progress/${id}`, {
+        const progressRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/progress/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         setProgress(progressRes.data)
@@ -49,7 +49,7 @@ const CourseDetail = () => {
         ? progress.lessonsCompleted
         : [...(progress?.lessonsCompleted || []), lessonIndex]
       const res = await axios.post(
-        'http://localhost:8080/api/progress',
+        `${import.meta.env.VITE_API_URL}/api/progress`,
         { courseId: id, lessonsCompleted: updatedLessons },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -66,7 +66,7 @@ const CourseDetail = () => {
         score: quizAnswers[index] === quiz.correctAnswer ? 1 : 0,
       }))
       const res = await axios.post(
-        'http://localhost:8080/api/progress',
+        `${import.meta.env.VITE_API_URL}/api/progress`,
         { courseId: id, quizScores, lessonsCompleted: progress?.lessonsCompleted || [] },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -79,7 +79,7 @@ const CourseDetail = () => {
 
   const handleDownloadCertificate = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/certificates/${id}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/certificates/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob', // Important for binary data
       })

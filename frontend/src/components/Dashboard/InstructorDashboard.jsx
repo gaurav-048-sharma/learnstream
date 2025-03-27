@@ -16,7 +16,7 @@ const InstructorDashboard = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/api/courses', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         // Filter courses by instructor (assuming backend populates instructor field)
@@ -56,7 +56,7 @@ const InstructorDashboard = () => {
     }
 
     try {
-      await axios.post('http://localhost:8080/api/courses', formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/courses`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -66,7 +66,7 @@ const InstructorDashboard = () => {
       setDescription('')
       setVideoFiles([])
       // Refresh course list
-      const res = await axios.get('http://localhost:8080/api/courses', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const instructorCourses = res.data.filter(course => course.instructor._id === getUserIdFromToken())

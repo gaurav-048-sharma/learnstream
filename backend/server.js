@@ -12,7 +12,10 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "https://learnstream-client-1jocsfcvz-gaurav-sharmas-projects-97aa0168.vercel.app",
+  credentials: true,
+}));
 app.use(express.json());
 
 // Connect to database
@@ -30,6 +33,6 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT,"0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
