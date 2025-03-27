@@ -10,24 +10,27 @@ const InstructorDashboard = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [videoFiles, setVideoFiles] = useState([])
+  const [editMode, setEditMode] = useState(false)
+  const [editCourseId, setEditCourseId] = useState(null)
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
+  const API_URL = import.meta.env.VITE_API_URL 
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        // Filter courses by instructor (assuming backend populates instructor field)
-        const instructorCourses = res.data.filter(course => course.instructor._id === getUserIdFromToken())
-        setCourses(instructorCourses)
-      } catch (error) {
-        console.error(error)
-      }
-    }
     fetchCourses()
   }, [token])
+
+  const fetchCourses = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/courses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const instructorCourses = res.data.filter(course => course.instructor._id === getUserIdFromToken())
+      setCourses(instructorCourses)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const getUserIdFromToken = () => {
     const token = localStorage.getItem('token')
@@ -56,35 +59,53 @@ const InstructorDashboard = () => {
     }
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/courses`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      setTitle('')
-      setDescription('')
-      setVideoFiles([])
-      // Refresh course list
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/courses`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const instructorCourses = res.data.filter(course => course.instructor._id === getUserIdFromToken())
-      setCourses(instructorCourses)
+      if (editMode) {
+        await axios.put(`${API_URL}/api/courses/${editCourseId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      } else {
+        await axios.post(`${API_URL}/api/courses`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      }
+      resetForm()
+      fetchCourses()
     } catch (error) {
       console.error(error)
-      alert('Failed to create course')
+      alert(`Failed to ${editMode ? 'update' : 'create'} course`)
     }
+  }
+
+  const handleEdit = (course) => {
+    setEditMode(true)
+    setEditCourseId(course._id)
+    setTitle(course.title)
+    setDescription(course.description)
+    setVideoFiles([]) // Reset files, as we’re appending new ones
+  }
+
+  const resetForm = () => {
+    setEditMode(false)
+    setEditCourseId(null)
+    setTitle('')
+    setDescription('')
+    setVideoFiles([])
   }
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Instructor Dashboard</h1>
 
-      {/* Course Creation Form */}
+      {/* Course Creation/Edit Form */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Create a New Course</CardTitle>
+          <CardTitle>{editMode ? 'Edit Course' : 'Create a New Course'}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,7 +127,12 @@ const InstructorDashboard = () => {
               accept="video/*"
               onChange={handleFileChange}
             />
-            <Button type="submit">Create Course</Button>
+            <div className="flex space-x-2">
+              <Button type="submit">{editMode ? 'Update Course' : 'Create Course'}</Button>
+              {editMode && (
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -121,12 +147,14 @@ const InstructorDashboard = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">{course.description}</p>
-              <Button
-                className="mt-4"
-                onClick={() => navigate(`/courses/${course._id}`)}
-              >
-                View Course
-              </Button>
+              <div className="mt-4 flex space-x-2">
+                <Button onClick={() => navigate(`/courses/${course._id}`)}>
+                  View
+                </Button>
+                <Button variant="outline" onClick={() => handleEdit(course)}>
+                  Edit
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

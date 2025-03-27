@@ -83,38 +83,51 @@ const getCourseById = async (req, res) => {
 
 // Update Course (add or replace videos)
 const updateCourse = async (req, res) => {
-    const { title, description, quizzes } = req.body;
-    const files = req.files;
-  
-    try {
-      const course = await Course.findById(req.params.id);
-      if (!course) return res.status(404).json({ message: 'Course not found' });
-      if (course.instructor.toString() !== req.user.id) {
-        return res.status(403).json({ message: 'Not authorized' });
-      }
-  
-      if (title) course.title = title;
-      if (description) course.description = description;
-      if (quizzes) course.quizzes = JSON.parse(quizzes);
-  
-      if (files && files.length > 0) {
-        const newLessons = [];
-        for (const file of files) {
-          const videoURL = await uploadVideoToCloudinary(file);
-          newLessons.push({
-            title: file.originalname.split('.')[0],
-            videoURL,
-          });
-        }
-        course.lessons = [...course.lessons, ...newLessons]; // Append new lessons
-      }
-  
-      await course.save();
-      res.json(course);
-    } catch (error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
+  const { id } = req.params;
+  const { title, description } = req.body;
+
+  try {
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
     }
-  };
+
+    // Check if the user is the instructor
+    if (course.instructor.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // Update fields
+    course.title = title || course.title;
+    course.description = description || course.description;
+
+    // Handle video uploads if provided
+    if (req.files && req.files.videos) {
+      const videos = Array.isArray(req.files.videos) ? req.files.videos : [req.files.videos];
+      const uploadedVideos = await Promise.all(
+        videos.map(async (video) => {
+          const result = await cloudinary.uploader.upload(video.path, {
+            resource_type: 'video',
+            folder: 'learnstream_videos',
+          });
+          return {
+            title: video.originalname.split('.')[0],
+            videoURL: result.secure_url,
+          };
+        })
+      );
+      course.lessons = [...course.lessons, ...uploadedVideos];
+    }
+
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 
 // Delete Course
 const deleteCourse = async (req, res) => {
